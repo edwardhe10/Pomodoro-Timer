@@ -1,5 +1,5 @@
 import "./App.css";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 
 function App() {
   const focusTime = 25 * 60; // 25 minutes in seconds
@@ -12,19 +12,7 @@ function App() {
   const [isRunning, setIsRunning] = useState(false);
   const [isFocusSession, setIsFocusSession] = useState(true);
 
-  useEffect(() => {
-    let interval;
-    if (isRunning && timer > 0) {
-      interval = setInterval(() => {
-        setTimer((prevTime) => prevTime - 1);
-      }, 1000);
-    } else if (timer === 0) {
-      handlePomodoroComplete();
-    }
-    return () => clearInterval(interval);
-  }, [isRunning, timer]);
-
-  const handlePomodoroComplete = () => {
+  const handlePomodoroComplete = useCallback(() => {
     setIsRunning(false);
 
     if (isFocusSession) {
@@ -48,7 +36,26 @@ function App() {
       setIsFocusSession(true);
       alert("Time to focus!");
     }
-  };
+  }, [
+    isFocusSession,
+    setPomodoroCount,
+    shortBreakTime,
+    longBreakTime,
+    focusTime,
+    pomodoroCount,
+  ]);
+
+  useEffect(() => {
+    let interval;
+    if (isRunning && timer > 0) {
+      interval = setInterval(() => {
+        setTimer((prevTime) => prevTime - 1);
+      }, 1000);
+    } else if (timer === 0) {
+      handlePomodoroComplete();
+    }
+    return () => clearInterval(interval);
+  }, [isRunning, timer, handlePomodoroComplete]);
 
   /* 
   useEffect(() => {
